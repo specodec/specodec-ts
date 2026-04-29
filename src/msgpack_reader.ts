@@ -1,4 +1,6 @@
-export class MsgPackReader {
+import type { SpecReader } from "./spec_reader.js";
+
+export class MsgPackReader implements SpecReader {
   private readonly buf: Uint8Array;
   private _pos: number;
   private _containerCount: number[] = [];
@@ -92,12 +94,82 @@ export class MsgPackReader {
     throw new Error(`msgpack: expected int, got 0x${b.toString(16)}`);
   }
 
+  readInt32(): number { return this.readInt() | 0; }
+
+  readInt64(): bigint {
+    const b = this.readByte();
+    if (b <= 0x7F) return BigInt(b);
+    if (b >= 0xE0) return BigInt(b - 0x100);
+    if (b === 0xCC) return BigInt(this.readByte());
+    if (b === 0xCD) return BigInt(this.readU16());
+    if (b === 0xCE) return BigInt(this.readU32());
+    if (b === 0xCF) {
+      const hi = this.readU32();
+      const lo = this.readU32();
+      return (BigInt(hi) << BigInt(32)) | BigInt(lo);
+    }
+    if (b === 0xD0) return BigInt(this.readByte() | 0);
+    if (b === 0xD1) return BigInt(this.readI16());
+    if (b === 0xD2) return BigInt(this.readI32());
+    if (b === 0xD3) {
+      const hi = this.readU32();
+      const lo = this.readU32();
+      const unsigned = (BigInt(hi) << BigInt(32)) | BigInt(lo);
+      return unsigned >= BigInt("9223372036854775808") ? unsigned - BigInt("18446744073709551616") : unsigned;
+    }
+    throw new Error(`msgpack: expected int64, got 0x${b.toString(16)}`);
+  }
+
+  readUint32(): number { return this.readInt() >>> 0; }
+
+  readUint64(): bigint {
+    const b = this.readByte();
+    if (b <= 0x7F) return BigInt(b);
+    if (b === 0xCC) return BigInt(this.readByte());
+    if (b === 0xCD) return BigInt(this.readU16());
+    if (b === 0xCE) return BigInt(this.readU32());
+    if (b === 0xCF) {
+      const hi = this.readU32();
+      const lo = this.readU32();
+      return (BigInt(hi) << BigInt(32)) | BigInt(lo);
+    }
+    throw new Error(`msgpack: expected uint64, got 0x${b.toString(16)}`);
+  }
+
   readFloat(): number {
     const b = this.readByte();
     if (b === 0xCA) return this.readF32();
     if (b === 0xCB) return this.readF64();
     throw new Error(`msgpack: expected float, got 0x${b.toString(16)}`);
   }
+
+  readFloat32(): number {
+    const b = this.readByte();
+    if (b === 0xCA) return Math.fround(this.readF32());
+    if (b === 0xCB) return Math.fround(this.readF64());
+    throw new Error(`msgpack: expected float32, got 0x${b.toString(16)}`);
+  }
+
+  readFloat64(): number {
+    const b = this.readByte();
+    if (b === 0xCA) return this.readF32();
+    if (b === 0xCB) return this.readF64();
+    throw new Error(`msgpack: expected float64, got 0x${b.toString(16)}`);
+  }
+
+  readBytes(): Uint8Array {
+    const b = this.readByte();
+    let len: number;
+    if (b === 0xC4) len = this.readByte();
+    else if (b === 0xC5) len = this.readU16();
+    else if (b === 0xC6) len = this.readU32();
+    else throw new Error(`msgpack: expected bin, got 0x${b.toString(16)}`);
+    const slice = this.buf.slice(this._pos, this._pos + len);
+    this._pos += len;
+    return slice;
+  }
+
+  readEnum(): string { return this.readString(); }
 
   readBool(): boolean {
     const b = this.readByte();

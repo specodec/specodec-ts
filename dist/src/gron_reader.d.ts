@@ -1,0 +1,25 @@
+export declare class GronReader {
+    constructor(_data: Uint8Array);
+    readString(): string;
+    readBool(): boolean;
+    readInt32(): number;
+    readInt64(): bigint;
+    readUint32(): number;
+    readUint64(): bigint;
+    readFloat32(): number;
+    readFloat64(): number;
+    readNull(): null;
+    readBytes(): Uint8Array;
+    readEnum(): string;
+    beginObject(): void;
+    hasNextField(): boolean;
+    readFieldName(): string;
+    nextFieldSeparator(): void;
+    endObject(): void;
+    beginArray(): void;
+    hasNextElement(): boolean;
+    nextElementSeparator(): void;
+    endArray(): void;
+    isNull(): boolean;
+    skip(): void;
+}

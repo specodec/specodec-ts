@@ -1,6 +1,10 @@
-export class JsonReader {
+import type { SpecReader } from "./spec_reader.js";
+
+export class JsonReader implements SpecReader {
   private readonly src: string;
   private _pos: number;
+  private _firstField: boolean[] = [];
+  private _firstElement: boolean[] = [];
 
   constructor(data: Uint8Array) {
     this.src = new TextDecoder().decode(data);
@@ -246,27 +250,34 @@ export class JsonReader {
 
   beginObject(): void {
     this.expect("{");
+    this._firstField.push(true);
   }
 
   hasNextField(): boolean {
     const ch = this.peek();
     if (ch === "}") {
+      this._firstField.pop();
       return false;
+    }
+    const top = this._firstField.length - 1;
+    if (!this._firstField[top]) {
+      if (ch !== ",") throw new Error(`json: expected ',' or '}', got '${ch}'`);
+      this._pos++;
+    } else {
+      this._firstField[top] = false;
     }
     return true;
   }
 
   readFieldName(): string {
-    return this.parseString();
-  }
-
-  nextFieldSeparator(): void {
-    const ch = this.peek();
-    if (ch === ",") {
+    const key = this.parseString();
+    this.ws();
+    if (this._pos < this.src.length && this.src[this._pos] === ":") {
       this._pos++;
-    } else if (ch !== "}") {
-      throw new Error(`json: expected ',' or '}', got '${ch}'`);
+    } else {
+      throw new Error(`json: expected ':' after field name '${key}'`);
     }
+    return key;
   }
 
   endObject(): void {
@@ -275,20 +286,23 @@ export class JsonReader {
 
   beginArray(): void {
     this.expect("[");
+    this._firstElement.push(true);
   }
 
   hasNextElement(): boolean {
     const ch = this.peek();
-    return ch !== "]";
-  }
-
-  nextElementSeparator(): void {
-    const ch = this.peek();
-    if (ch === ",") {
-      this._pos++;
-    } else if (ch !== "]") {
-      throw new Error(`json: expected ',' or ']', got '${ch}'`);
+    if (ch === "]") {
+      this._firstElement.pop();
+      return false;
     }
+    const top = this._firstElement.length - 1;
+    if (!this._firstElement[top]) {
+      if (ch !== ",") throw new Error(`json: expected ',' or ']', got '${ch}'`);
+      this._pos++;
+    } else {
+      this._firstElement[top] = false;
+    }
+    return true;
   }
 
   endArray(): void {
@@ -321,12 +335,8 @@ export class JsonReader {
       }
       case "{": {
         this.beginObject();
-        let first = true;
         while (this.hasNextField()) {
-          if (!first) this.nextFieldSeparator();
-          first = false;
           this.readFieldName();
-          this.expect(":");
           this.skip();
         }
         this.endObject();
@@ -334,10 +344,7 @@ export class JsonReader {
       }
       case "[": {
         this.beginArray();
-        let first = true;
         while (this.hasNextElement()) {
-          if (!first) this.nextElementSeparator();
-          first = false;
           this.skip();
         }
         this.endArray();

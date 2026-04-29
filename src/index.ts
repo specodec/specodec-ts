@@ -1,3 +1,6 @@
+export type { SpecReader } from "./spec_reader.js";
+export type { SpecCodec } from "./spec_codec.js";
+export { dispatch, respond } from "./spec_codec.js";
 export { JsonWriter } from "./json_writer.js";
 export { JsonReader } from "./json_reader.js";
 export { MsgPackWriter } from "./msgpack_writer.js";
