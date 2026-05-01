@@ -72,7 +72,7 @@ export class GronReader {
 
   readFloat32(): number {
     const v = this.lines[this.cursor++].rawValue;
-    return v === "-0" ? -0 : parseFloat(v);
+    return v === "-0" ? -0 : Math.fround(parseFloat(v));
   }
 
   readFloat64(): number {
@@ -117,8 +117,6 @@ export class GronReader {
     return this.lines[this.cursor].path.substring(pfx.length);
   }
 
-  nextFieldSeparator(): void {}
-
   endObject(): void {
     this.ctx.pop();
   }
@@ -136,8 +134,6 @@ export class GronReader {
     const p = this.lines[this.cursor].path;
     return p === exp || p.startsWith(exp + ".") || p.startsWith(exp + "[");
   }
-
-  nextElementSeparator(): void {}
 
   nextElement(): void {
     const arr = this.ctx[this.ctx.length - 1];

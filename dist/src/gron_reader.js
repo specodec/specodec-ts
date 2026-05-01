@@ -83,7 +83,7 @@ export class GronReader {
     }
     readFloat32() {
         const v = this.lines[this.cursor++].rawValue;
-        return v === "-0" ? -0 : parseFloat(v);
+        return v === "-0" ? -0 : Math.fround(parseFloat(v));
     }
     readFloat64() {
         const v = this.lines[this.cursor++].rawValue;
@@ -124,7 +124,6 @@ export class GronReader {
         const pfx = this.ctx[this.ctx.length - 1].prefix + ".";
         return this.lines[this.cursor].path.substring(pfx.length);
     }
-    nextFieldSeparator() { }
     endObject() {
         this.ctx.pop();
     }
@@ -141,7 +140,6 @@ export class GronReader {
         const p = this.lines[this.cursor].path;
         return p === exp || p.startsWith(exp + ".") || p.startsWith(exp + "[");
     }
-    nextElementSeparator() { }
     nextElement() {
         const arr = this.ctx[this.ctx.length - 1];
         arr.index = (arr.index ?? -1) + 1;

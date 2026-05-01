@@ -1,3 +1,5 @@
+import { fmtFloat32 } from "./float_fmt.js";
+
 export class GronWriter {
   private lines: string[] = [];
   private segments: string[] = ["json"];
@@ -76,8 +78,9 @@ export class GronWriter {
   }
 
   writeFloat32(value: number): void {
-    if (!isFinite(value)) throw new Error("float32: NaN/Infinity not valid");
-    this.emit(Object.is(value, -0) ? "-0" : String(value));
+    const v = Math.fround(value);
+    if (!isFinite(v)) throw new Error("float32: NaN/Infinity not valid");
+    this.emit(fmtFloat32(v));
   }
 
   writeFloat64(value: number): void {

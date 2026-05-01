@@ -18,11 +18,9 @@ export declare class GronReader {
     beginObject(): void;
     hasNextField(): boolean;
     readFieldName(): string;
-    nextFieldSeparator(): void;
     endObject(): void;
     beginArray(): void;
     hasNextElement(): boolean;
-    nextElementSeparator(): void;
     nextElement(): void;
     endArray(): void;
     isNull(): boolean;
