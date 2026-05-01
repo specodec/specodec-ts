@@ -5,7 +5,7 @@ import { MsgPackReader } from "./msgpack_reader.js";
 import { GronWriter } from "./gron_writer.js";
 import { GronReader } from "./gron_reader.js";
 // ---------------------------------------------------------------------------
-// FormatRegistry: maps content-type substrings to format entries
+// FormatRegistry: maps format name substrings to format entries
 // ---------------------------------------------------------------------------
 export class FormatRegistry {
     entries = [];
@@ -13,9 +13,9 @@ export class FormatRegistry {
         this.entries.push(entry);
         return this;
     }
-    match(contentType) {
+    match(format) {
         for (const e of this.entries) {
-            if (contentType.includes(e.contentType.split("/")[1]))
+            if (format.includes(e.name))
                 return e;
         }
         return this.entries[0]; // default: first registered (JSON)
@@ -26,30 +26,30 @@ export class FormatRegistry {
 // ---------------------------------------------------------------------------
 export const defaultRegistry = new FormatRegistry()
     .register({
-    contentType: "application/json",
+    name: "json",
     newWriter: () => new JsonWriter(),
     newReader: (body) => new JsonReader(body),
 })
     .register({
-    contentType: "application/msgpack",
+    name: "msgpack",
     newWriter: () => new MsgPackWriter(),
     newReader: (body) => new MsgPackReader(body),
 })
     .register({
-    contentType: "application/gron",
+    name: "gron",
     newWriter: () => new GronWriter(),
     newReader: (body) => new GronReader(body),
 });
 // ---------------------------------------------------------------------------
 // dispatch / respond — use registry
 // ---------------------------------------------------------------------------
-export function dispatch(codec, body, contentType, registry = defaultRegistry) {
-    const fmt = registry.match(contentType);
+export function dispatch(codec, body, format, registry = defaultRegistry) {
+    const fmt = registry.match(format);
     return codec.decode(fmt.newReader(body));
 }
-export function respond(codec, obj, accept, registry = defaultRegistry) {
-    const fmt = registry.match(accept);
+export function respond(codec, obj, format, registry = defaultRegistry) {
+    const fmt = registry.match(format);
     const w = fmt.newWriter();
     codec.encode(w, obj);
-    return { body: w.toBytes(), contentType: fmt.contentType };
+    return { body: w.toBytes(), name: fmt.name };
 }

@@ -13,16 +13,16 @@ export interface SpecCodec<T> {
 }
 
 // ---------------------------------------------------------------------------
-// FormatEntry: a reader/writer factory pair for one MIME type
+// FormatEntry: a reader/writer factory pair for one format
 // ---------------------------------------------------------------------------
 export interface FormatEntry {
-  contentType: string;
+  name: string;        // e.g. "json", "msgpack", "gron"
   newWriter(): SpecWriter;
   newReader(body: Uint8Array): SpecReader;
 }
 
 // ---------------------------------------------------------------------------
-// FormatRegistry: maps content-type substrings to format entries
+// FormatRegistry: maps format name substrings to format entries
 // ---------------------------------------------------------------------------
 export class FormatRegistry {
   private readonly entries: FormatEntry[] = [];
@@ -32,9 +32,9 @@ export class FormatRegistry {
     return this;
   }
 
-  match(contentType: string): FormatEntry {
+  match(format: string): FormatEntry {
     for (const e of this.entries) {
-      if (contentType.includes(e.contentType.split("/")[1])) return e;
+      if (format.includes(e.name)) return e;
     }
     return this.entries[0]; // default: first registered (JSON)
   }
@@ -45,17 +45,17 @@ export class FormatRegistry {
 // ---------------------------------------------------------------------------
 export const defaultRegistry = new FormatRegistry()
   .register({
-    contentType: "application/json",
+    name: "json",
     newWriter: () => new JsonWriter(),
     newReader: (body) => new JsonReader(body),
   })
   .register({
-    contentType: "application/msgpack",
+    name: "msgpack",
     newWriter: () => new MsgPackWriter(),
     newReader: (body) => new MsgPackReader(body),
   })
   .register({
-    contentType: "application/gron",
+    name: "gron",
     newWriter: () => new GronWriter(),
     newReader: (body) => new GronReader(body),
   });
@@ -66,26 +66,26 @@ export const defaultRegistry = new FormatRegistry()
 export function dispatch<T>(
   codec: SpecCodec<T>,
   body: Uint8Array,
-  contentType: string,
+  format: string,
   registry: FormatRegistry = defaultRegistry,
 ): T {
-  const fmt = registry.match(contentType);
+  const fmt = registry.match(format);
   return codec.decode(fmt.newReader(body));
 }
 
 export interface RespondResult {
   body: Uint8Array;
-  contentType: string;
+  name: string;   // format name: "json" | "msgpack" | "gron"
 }
 
 export function respond<T>(
   codec: SpecCodec<T>,
   obj: T,
-  accept: string,
+  format: string,
   registry: FormatRegistry = defaultRegistry,
 ): RespondResult {
-  const fmt = registry.match(accept);
+  const fmt = registry.match(format);
   const w = fmt.newWriter();
   codec.encode(w, obj);
-  return { body: w.toBytes(), contentType: fmt.contentType };
+  return { body: w.toBytes(), name: fmt.name };
 }

@@ -5,19 +5,19 @@ export interface SpecCodec<T> {
     decode(r: SpecReader): T;
 }
 export interface FormatEntry {
-    contentType: string;
+    name: string;
     newWriter(): SpecWriter;
     newReader(body: Uint8Array): SpecReader;
 }
 export declare class FormatRegistry {
     private readonly entries;
     register(entry: FormatEntry): this;
-    match(contentType: string): FormatEntry;
+    match(format: string): FormatEntry;
 }
 export declare const defaultRegistry: FormatRegistry;
-export declare function dispatch<T>(codec: SpecCodec<T>, body: Uint8Array, contentType: string, registry?: FormatRegistry): T;
+export declare function dispatch<T>(codec: SpecCodec<T>, body: Uint8Array, format: string, registry?: FormatRegistry): T;
 export interface RespondResult {
     body: Uint8Array;
-    contentType: string;
+    name: string;
 }
-export declare function respond<T>(codec: SpecCodec<T>, obj: T, accept: string, registry?: FormatRegistry): RespondResult;
+export declare function respond<T>(codec: SpecCodec<T>, obj: T, format: string, registry?: FormatRegistry): RespondResult;
