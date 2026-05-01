@@ -131,6 +131,7 @@ export class JsonReader {
         throw new Error("json: unterminated string");
     }
     parseNumberRaw() {
+        this.ws();
         const start = this._pos;
         if (this.src.charCodeAt(this._pos) === 0x2D)
             this._pos++;
@@ -315,6 +316,7 @@ export class JsonReader {
         else {
             throw new Error(`json: expected ':' after field name '${key}'`);
         }
+        this.ws();
         return key;
     }
     endObject() {

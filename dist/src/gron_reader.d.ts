@@ -1,5 +1,9 @@
 export declare class GronReader {
-    constructor(_data: Uint8Array);
+    private lines;
+    private cursor;
+    private ctx;
+    constructor(data: Uint8Array);
+    private unescape;
     readString(): string;
     readBool(): boolean;
     readInt32(): number;
@@ -19,6 +23,7 @@ export declare class GronReader {
     beginArray(): void;
     hasNextElement(): boolean;
     nextElementSeparator(): void;
+    nextElement(): void;
     endArray(): void;
     isNull(): boolean;
     skip(): void;

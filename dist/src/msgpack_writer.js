@@ -194,5 +194,6 @@ export class MsgPackWriter {
     }
     nextElement() { }
     endArray() { }
+    writeEnum(value) { this.writeString(value); }
     toBytes() { return new Uint8Array(this.buf); }
 }

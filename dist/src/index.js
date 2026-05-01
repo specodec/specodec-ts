@@ -1,4 +1,4 @@
-export { dispatch, respond } from "./spec_codec.js";
+export { FormatRegistry, defaultRegistry, dispatch, respond } from "./spec_codec.js";
 export { JsonWriter } from "./json_writer.js";
 export { JsonReader } from "./json_reader.js";
 export { MsgPackWriter } from "./msgpack_writer.js";

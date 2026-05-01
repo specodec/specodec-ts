@@ -67,12 +67,12 @@ export class JsonWriter {
   writeFloat32(value: number): void {
     const v = Math.fround(value);
     if (!isFinite(v)) throw new Error("float32: NaN/Infinity not valid JSON");
-    this.parts.push(String(v));
+    this.parts.push(Object.is(v, -0) ? "-0" : String(v));
   }
 
   writeFloat64(value: number): void {
     if (!isFinite(value)) throw new Error("float64: NaN/Infinity not valid JSON");
-    this.parts.push(String(value));
+    this.parts.push(Object.is(value, -0) ? "-0" : String(value));
   }
 
   writeNull(): void {
@@ -87,7 +87,7 @@ export class JsonWriter {
     this.parts.push('"' + this.escape(value) + '"');
   }
 
-  beginObject(): void {
+  beginObject(_fieldCount?: number): void {
     this.parts.push("{");
     this.firstItem.push(true);
   }
@@ -104,7 +104,7 @@ export class JsonWriter {
     this.parts.push("}");
   }
 
-  beginArray(): void {
+  beginArray(_size?: number): void {
     this.parts.push("[");
     this.firstItem.push(true);
   }

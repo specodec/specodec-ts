@@ -90,12 +90,22 @@ export class MsgPackReader {
             return this.readU16();
         if (b === 0xCE)
             return this.readU32();
-        if (b === 0xD0)
-            return this.readByte() | 0;
+        if (b === 0xCF) {
+            this.readU32();
+            return this.readU32();
+        }
+        if (b === 0xD0) {
+            const v = this.readByte();
+            return v > 127 ? v - 256 : v;
+        }
         if (b === 0xD1)
             return this.readI16();
         if (b === 0xD2)
             return this.readI32();
+        if (b === 0xD3) {
+            this.readU32();
+            return this.readI32();
+        }
         throw new Error(`msgpack: expected int, got 0x${b.toString(16)}`);
     }
     readInt32() { return this.readInt() | 0; }
@@ -116,8 +126,10 @@ export class MsgPackReader {
             const lo = this.readU32();
             return (BigInt(hi) << BigInt(32)) | BigInt(lo);
         }
-        if (b === 0xD0)
-            return BigInt(this.readByte() | 0);
+        if (b === 0xD0) {
+            const v = this.readByte();
+            return BigInt(v > 127 ? v - 256 : v);
+        }
         if (b === 0xD1)
             return BigInt(this.readI16());
         if (b === 0xD2)
@@ -162,6 +174,24 @@ export class MsgPackReader {
             return Math.fround(this.readF32());
         if (b === 0xCB)
             return Math.fround(this.readF64());
+        if (b <= 0x7F)
+            return b;
+        if (b >= 0xE0)
+            return b - 0x100;
+        if (b === 0xCC)
+            return this.readByte();
+        if (b === 0xCD)
+            return this.readU16();
+        if (b === 0xCE)
+            return this.readU32();
+        if (b === 0xD0) {
+            const v = this.readByte();
+            return v > 127 ? v - 256 : v;
+        }
+        if (b === 0xD1)
+            return this.readI16();
+        if (b === 0xD2)
+            return this.readI32();
         throw new Error(`msgpack: expected float32, got 0x${b.toString(16)}`);
     }
     readFloat64() {
@@ -170,6 +200,24 @@ export class MsgPackReader {
             return this.readF32();
         if (b === 0xCB)
             return this.readF64();
+        if (b <= 0x7F)
+            return b;
+        if (b >= 0xE0)
+            return b - 0x100;
+        if (b === 0xCC)
+            return this.readByte();
+        if (b === 0xCD)
+            return this.readU16();
+        if (b === 0xCE)
+            return this.readU32();
+        if (b === 0xD0) {
+            const v = this.readByte();
+            return v > 127 ? v - 256 : v;
+        }
+        if (b === 0xD1)
+            return this.readI16();
+        if (b === 0xD2)
+            return this.readI32();
         throw new Error(`msgpack: expected float64, got 0x${b.toString(16)}`);
     }
     readBytes() {

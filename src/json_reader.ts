@@ -105,6 +105,7 @@ export class JsonReader implements SpecReader {
   }
 
   private parseNumberRaw(): string {
+    this.ws();
     const start = this._pos;
     if (this.src.charCodeAt(this._pos) === 0x2D) this._pos++;
     if (this._pos >= this.src.length) throw new Error("json: unexpected end of number");
@@ -277,6 +278,7 @@ export class JsonReader implements SpecReader {
     } else {
       throw new Error(`json: expected ':' after field name '${key}'`);
     }
+    this.ws();
     return key;
   }
 

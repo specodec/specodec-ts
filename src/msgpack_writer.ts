@@ -104,5 +104,7 @@ export class MsgPackWriter {
 
   endArray(): void {}
 
+  writeEnum(value: string): void { this.writeString(value); }
+
   toBytes(): Uint8Array { return new Uint8Array(this.buf); }
 }

@@ -20,5 +20,6 @@ export declare class MsgPackWriter {
     beginArray(elementCount: number): void;
     nextElement(): void;
     endArray(): void;
+    writeEnum(value: string): void;
     toBytes(): Uint8Array;
 }

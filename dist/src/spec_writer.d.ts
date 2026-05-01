@@ -1,8 +1,4 @@
-export declare class JsonWriter {
-    private parts;
-    private firstItem;
-    private escape;
-    private b64;
+export interface SpecWriter {
     writeString(value: string): void;
     writeBool(value: boolean): void;
     writeInt32(value: number): void;
@@ -14,10 +10,10 @@ export declare class JsonWriter {
     writeNull(): void;
     writeBytes(value: Uint8Array): void;
     writeEnum(value: string): void;
-    beginObject(_fieldCount?: number): void;
+    beginObject(fieldCount: number): void;
     writeField(name: string): void;
     endObject(): void;
-    beginArray(_size?: number): void;
+    beginArray(elementCount: number): void;
     nextElement(): void;
     endArray(): void;
     toBytes(): Uint8Array;
