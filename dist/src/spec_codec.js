@@ -15,7 +15,7 @@ export class FormatRegistry {
     }
     match(format) {
         for (const e of this.entries) {
-            if (format.includes(e.name))
+            if (format === e.name)
                 return e;
         }
         return this.entries[0]; // default: first registered (JSON)
