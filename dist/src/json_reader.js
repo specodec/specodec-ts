@@ -244,7 +244,9 @@ export class JsonReader {
     readFloat32() {
         const raw = this.parseNumberRaw();
         const v = parseFloat(raw);
-        return Math.fround(v);
+        const f32 = new Float32Array(1);
+        f32[0] = v;
+        return f32[0];
     }
     readFloat64() {
         const raw = this.parseNumberRaw();

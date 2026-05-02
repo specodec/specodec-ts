@@ -207,7 +207,9 @@ export class JsonReader implements SpecReader {
   readFloat32(): number {
     const raw = this.parseNumberRaw();
     const v = parseFloat(raw);
-    return Math.fround(v);
+    const f32 = new Float32Array(1);
+    f32[0] = v;
+    return f32[0];
   }
 
   readFloat64(): number {

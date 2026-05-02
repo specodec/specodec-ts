@@ -72,12 +72,14 @@ export class GronReader {
 
   readFloat32(): number {
     const v = this.lines[this.cursor++].rawValue;
-    return v === "-0" ? -0 : Math.fround(parseFloat(v));
+    const f32 = new Float32Array(1);
+    f32[0] = parseFloat(v);
+    return f32[0];
   }
 
   readFloat64(): number {
     const v = this.lines[this.cursor++].rawValue;
-    return v === "-0" ? -0 : parseFloat(v);
+    return parseFloat(v);
   }
 
   readNull(): null {

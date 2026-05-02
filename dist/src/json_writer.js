@@ -1,4 +1,4 @@
-import { fmtFloat32 } from "./float_fmt.js";
+import { formatFloat32, formatFloat64 } from "./float_fmt.js";
 export class JsonWriter {
     parts = [];
     firstItem = [];
@@ -72,15 +72,17 @@ export class JsonWriter {
         this.parts.push('"' + String(value) + '"');
     }
     writeFloat32(value) {
-        const v = Math.fround(value);
+        const f32 = new Float32Array(1);
+        f32[0] = value;
+        const v = f32[0];
         if (!isFinite(v))
             throw new Error("float32: NaN/Infinity not valid JSON");
-        this.parts.push(fmtFloat32(v));
+        this.parts.push(formatFloat32(value));
     }
     writeFloat64(value) {
         if (!isFinite(value))
             throw new Error("float64: NaN/Infinity not valid JSON");
-        this.parts.push(Object.is(value, -0) ? "-0" : String(value));
+        this.parts.push(formatFloat64(value));
     }
     writeNull() {
         this.parts.push("null");

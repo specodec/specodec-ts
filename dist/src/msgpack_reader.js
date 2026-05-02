@@ -170,10 +170,15 @@ export class MsgPackReader {
     }
     readFloat32() {
         const b = this.readByte();
-        if (b === 0xCA)
-            return Math.fround(this.readF32());
-        if (b === 0xCB)
-            return Math.fround(this.readF64());
+        const f32 = new Float32Array(1);
+        if (b === 0xCA) {
+            f32[0] = this.readF32();
+            return f32[0];
+        }
+        if (b === 0xCB) {
+            f32[0] = this.readF64();
+            return f32[0];
+        }
         if (b <= 0x7F)
             return b;
         if (b >= 0xE0)
