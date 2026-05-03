@@ -14,8 +14,10 @@ export class FormatRegistry {
         return this;
     }
     match(format) {
+        const lc = format.toLowerCase();
         for (const e of this.entries) {
-            if (format === e.name)
+            // Exact match or MIME-type substring: "application/json" contains "json"
+            if (lc === e.name || lc.includes(e.name))
                 return e;
         }
         return this.entries[0]; // default: first registered (JSON)
@@ -48,6 +50,12 @@ export function dispatch(codec, body, format, registry = defaultRegistry) {
     return codec.decode(fmt.newReader(body));
 }
 export function respond(codec, obj, format, registry = defaultRegistry) {
+    const fmt = registry.match(format);
+    const w = fmt.newWriter();
+    codec.encode(w, obj);
+    return w.toBytes();
+}
+export function respondFull(codec, obj, format, registry = defaultRegistry) {
     const fmt = registry.match(format);
     const w = fmt.newWriter();
     codec.encode(w, obj);

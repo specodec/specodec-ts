@@ -21,7 +21,6 @@ export declare class GronReader {
     endObject(): void;
     beginArray(): void;
     hasNextElement(): boolean;
-    nextElement(): void;
     endArray(): void;
     isNull(): boolean;
     skip(): void;

@@ -20,4 +20,5 @@ export interface RespondResult {
     body: Uint8Array;
     name: string;
 }
-export declare function respond<T>(codec: SpecCodec<T>, obj: T, format: string, registry?: FormatRegistry): RespondResult;
+export declare function respond<T>(codec: SpecCodec<T>, obj: T, format: string, registry?: FormatRegistry): Uint8Array;
+export declare function respondFull<T>(codec: SpecCodec<T>, obj: T, format: string, registry?: FormatRegistry): RespondResult;

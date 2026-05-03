@@ -72,6 +72,9 @@ export class GronReader {
 
   readFloat32(): number {
     const v = this.lines[this.cursor++].rawValue;
+    if (v === '"NaN"' || v === 'NaN') return NaN;
+    if (v === '"Infinity"' || v === 'Infinity') return Infinity;
+    if (v === '"-Infinity"' || v === '-Infinity') return -Infinity;
     const f32 = new Float32Array(1);
     f32[0] = parseFloat(v);
     return f32[0];
@@ -79,6 +82,9 @@ export class GronReader {
 
   readFloat64(): number {
     const v = this.lines[this.cursor++].rawValue;
+    if (v === '"NaN"' || v === 'NaN') return NaN;
+    if (v === '"Infinity"' || v === 'Infinity') return Infinity;
+    if (v === '"-Infinity"' || v === '-Infinity') return -Infinity;
     return parseFloat(v);
   }
 
@@ -134,12 +140,9 @@ export class GronReader {
     const ni = (arr.index ?? -1) + 1;
     const exp = arr.prefix + "[" + ni + "]";
     const p = this.lines[this.cursor].path;
-    return p === exp || p.startsWith(exp + ".") || p.startsWith(exp + "[");
-  }
-
-  nextElement(): void {
-    const arr = this.ctx[this.ctx.length - 1];
-    arr.index = (arr.index ?? -1) + 1;
+    const hasNext = p === exp || p.startsWith(exp + ".") || p.startsWith(exp + "[");
+    if (hasNext) arr.index = ni;
+    return hasNext;
   }
 
   endArray(): void {

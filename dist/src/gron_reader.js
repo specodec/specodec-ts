@@ -83,12 +83,24 @@ export class GronReader {
     }
     readFloat32() {
         const v = this.lines[this.cursor++].rawValue;
+        if (v === '"NaN"' || v === 'NaN')
+            return NaN;
+        if (v === '"Infinity"' || v === 'Infinity')
+            return Infinity;
+        if (v === '"-Infinity"' || v === '-Infinity')
+            return -Infinity;
         const f32 = new Float32Array(1);
         f32[0] = parseFloat(v);
         return f32[0];
     }
     readFloat64() {
         const v = this.lines[this.cursor++].rawValue;
+        if (v === '"NaN"' || v === 'NaN')
+            return NaN;
+        if (v === '"Infinity"' || v === 'Infinity')
+            return Infinity;
+        if (v === '"-Infinity"' || v === '-Infinity')
+            return -Infinity;
         return parseFloat(v);
     }
     readNull() {
@@ -140,11 +152,10 @@ export class GronReader {
         const ni = (arr.index ?? -1) + 1;
         const exp = arr.prefix + "[" + ni + "]";
         const p = this.lines[this.cursor].path;
-        return p === exp || p.startsWith(exp + ".") || p.startsWith(exp + "[");
-    }
-    nextElement() {
-        const arr = this.ctx[this.ctx.length - 1];
-        arr.index = (arr.index ?? -1) + 1;
+        const hasNext = p === exp || p.startsWith(exp + ".") || p.startsWith(exp + "[");
+        if (hasNext)
+            arr.index = ni;
+        return hasNext;
     }
     endArray() {
         this.ctx.pop();

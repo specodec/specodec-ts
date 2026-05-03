@@ -81,12 +81,22 @@ export class GronWriter {
     const f32 = new Float32Array(1);
     f32[0] = value;
     const v = f32[0];
-    if (!isFinite(v)) throw new Error("float32: NaN/Infinity not valid");
+    if (!isFinite(v)) {
+      if (Number.isNaN(v)) this.emit('"NaN"');
+      else if (v > 0) this.emit('"Infinity"');
+      else this.emit('"-Infinity"');
+      return;
+    }
     this.emit(formatFloat32(value));
   }
 
   writeFloat64(value: number): void {
-    if (!isFinite(value)) throw new Error("float64: NaN/Infinity not valid");
+    if (!isFinite(value)) {
+      if (Number.isNaN(value)) this.emit('"NaN"');
+      else if (value > 0) this.emit('"Infinity"');
+      else this.emit('"-Infinity"');
+      return;
+    }
     this.emit(formatFloat64(value));
   }
 

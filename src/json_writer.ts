@@ -70,12 +70,22 @@ export class JsonWriter {
     const f32 = new Float32Array(1);
     f32[0] = value;
     const v = f32[0];
-    if (!isFinite(v)) throw new Error("float32: NaN/Infinity not valid JSON");
+    if (!isFinite(v)) {
+      if (Number.isNaN(v)) this.parts.push('"NaN"');
+      else if (v > 0) this.parts.push('"Infinity"');
+      else this.parts.push('"-Infinity"');
+      return;
+    }
     this.parts.push(formatFloat32(value));
   }
 
   writeFloat64(value: number): void {
-    if (!isFinite(value)) throw new Error("float64: NaN/Infinity not valid JSON");
+    if (!isFinite(value)) {
+      if (Number.isNaN(value)) this.parts.push('"NaN"');
+      else if (value > 0) this.parts.push('"Infinity"');
+      else this.parts.push('"-Infinity"');
+      return;
+    }
     this.parts.push(formatFloat64(value));
   }
 

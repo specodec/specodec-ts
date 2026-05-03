@@ -204,15 +204,32 @@ export class JsonReader implements SpecReader {
     return v;
   }
 
-  readFloat32(): number {
+readFloat32(): number {
+    const ch = this.peek();
+    if (ch === '"') {
+      const s = this.parseString();
+      if (s === "NaN") return NaN;
+      if (s === "Infinity") return Infinity;
+      if (s === "-Infinity") return -Infinity;
+      const f32 = new Float32Array(1);
+      f32[0] = parseFloat(s);
+      return f32[0];
+    }
     const raw = this.parseNumberRaw();
-    const v = parseFloat(raw);
     const f32 = new Float32Array(1);
-    f32[0] = v;
+    f32[0] = parseFloat(raw);
     return f32[0];
   }
 
   readFloat64(): number {
+    const ch = this.peek();
+    if (ch === '"') {
+      const s = this.parseString();
+      if (s === "NaN") return NaN;
+      if (s === "Infinity") return Infinity;
+      if (s === "-Infinity") return -Infinity;
+      return parseFloat(s);
+    }
     const raw = this.parseNumberRaw();
     return parseFloat(raw);
   }
