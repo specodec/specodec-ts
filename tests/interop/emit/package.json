@@ -1,10 +1,9 @@
 {
-  "name": "specodec-interop-ts",
+  "name": "specodec-interop-ts-emit",
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "@specodec/typespec-emitter-ts": "file:../../../typespec-emitter-ts",
-    "@typespec/compiler": "^1.11.0"
+    "@specodec/specodec-ts": "file:../../../.."
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
