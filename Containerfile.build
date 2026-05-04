@@ -1,12 +1,12 @@
-FROM dhi.io/bun:1-alpine3.22-dev AS builder
+FROM dev:all AS builder
 WORKDIR /app
 ARG HTTP_PROXY HTTPS_PROXY http_proxy https_proxy ALL_PROXY all_proxy
 ENV http_proxy=${HTTP_PROXY} https_proxy=${HTTPS_PROXY} HTTP_PROXY=${HTTP_PROXY} HTTPS_PROXY=${HTTPS_PROXY} ALL_PROXY=${ALL_PROXY}
-RUN apk add --no-cache git
+ENV PATH="/root/.local/share/mise/shims:$PATH"
 COPY package.json package-lock.json* tsconfig.json ./
 COPY src/ src/
-RUN --mount=type=cache,target=/root/.bun-install \
-    bun install && bun run build
+RUN --mount=type=cache,target=/root/.npm \
+    npm install && npm run build
 
 FROM scratch
 COPY --from=builder /app/dist/ /out/

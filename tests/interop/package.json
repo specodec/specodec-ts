@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
-    "@specodec/typespec-emitter-ts": "file:../../../typespec-emitter-ts",
-    "@typespec/compiler": "^1.11.0"
+    "@specodec/specodec-runtime-typescript": "github:specodec/specodec-runtime-ts",
+    "@specodec/typespec-emitter-core": "0.1.0",
+    "@specodec/typespec-emitter-typescript": "0.1.0",
+    "@typespec/compiler": "1.11.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

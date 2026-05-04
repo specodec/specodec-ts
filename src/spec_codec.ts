@@ -33,8 +33,10 @@ export class FormatRegistry {
   }
 
   match(format: string): FormatEntry {
+    const lc = format.toLowerCase();
     for (const e of this.entries) {
-      if (format === e.name) return e;
+      // Exact match or MIME-type substring: "application/json" contains "json"
+      if (lc === e.name || lc.includes(e.name)) return e;
     }
     return this.entries[0]; // default: first registered (JSON)
   }
@@ -79,6 +81,18 @@ export interface RespondResult {
 }
 
 export function respond<T>(
+  codec: SpecCodec<T>,
+  obj: T,
+  format: string,
+  registry: FormatRegistry = defaultRegistry,
+): Uint8Array {
+  const fmt = registry.match(format);
+  const w = fmt.newWriter();
+  codec.encode(w, obj);
+  return w.toBytes();
+}
+
+export function respondFull<T>(
   codec: SpecCodec<T>,
   obj: T,
   format: string,

@@ -1,77 +1,61 @@
-import { execSync } from 'child_process';
-import { existsSync, mkdirSync, rmSync, readFileSync, writeFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
+import { execSync } from "child_process";
+import { existsSync, mkdirSync, rmSync, readdirSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 
 const __dir = dirname(fileURLToPath(import.meta.url));
-const LANG_ROOT = join(__dir, '..');
-const TESTS_DIR = __dir;
-const CACHE = join(TESTS_DIR, '.tests-cache');
-const PROXY = process.env.PROXY || 'http://127.0.0.1:17890';
-
-const BUILD_ARGS = `--build-arg HTTP_PROXY=${PROXY} --build-arg HTTPS_PROXY=${PROXY} --build-arg http_proxy=${PROXY} --build-arg https_proxy=${PROXY} --build-arg ALL_PROXY=${PROXY} --build-arg all_proxy=${PROXY}`;
-const COMMON = `--network host ${BUILD_ARGS}`;
+const CACHE = join(__dir, ".tests-cache");
+const GENERATED = join(__dir, "src", "generated");
+const OUT_DIR = join(__dir, "output");
 
 function run(cmd) {
-  console.log('  >', cmd);
-  execSync(cmd, { stdio: 'inherit' });
+  console.log("  >", cmd);
+  execSync(cmd, { stdio: "inherit" });
 }
 
-// Step 1: Clone tests repo
-console.log('\n=== Step 1: Clone specodec/tests ===');
-if (existsSync(CACHE)) {
-  run(`git -C ${CACHE} pull`);
-} else {
-  run(`git clone --depth=1 https://github.com/specodec/tests ${CACHE}`);
+function ensure(dir) {
+  if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
 }
 
-// Step 2: Generate vectors + TS reference (TS is the reference itself, so just run gen_types)
-console.log('\n=== Step 2: Generate vectors + output_ts ===');
-run(`cd ${CACHE} && npm ci`);
+console.log("\n=== Step 0: Install dependencies ===");
+run(`cd ${__dir} && pnpm install`);
+
+console.log("\n=== Step 1: Clone tests repo ===");
+if (existsSync(CACHE)) rmSync(CACHE, { recursive: true });
+run(`git clone --depth=1 https://github.com/specodec/tests ${CACHE}`);
+
+console.log("\n=== Step 2: Generate vectors ===");
+run(`cd ${CACHE} && pnpm install --frozen-lockfile`);
 run(`cd ${CACHE} && node gen_types.mjs`);
-run(`cd ${CACHE} && node run_ts.mjs`);
 
-const vectorsDir = join(CACHE, 'vectors');
-const outputTsDir = join(CACHE, 'output_ts');
+const VEC_DIR = join(CACHE, "vectors");
 
-// TS interop test: just verify output_ts is correct (TS is the reference)
-console.log('\n=== Step 3: TS interop test (reference implementation) ===');
-console.log('  TS is the reference - vectors generated successfully');
+console.log("\n=== Step 3: Generate emit code ===");
+if (existsSync(GENERATED)) rmSync(GENERATED, { recursive: true });
+ensure(GENERATED);
 
-// Step 4: Emit compile test
-console.log('\n=== Step 4: Emit compile test ===');
-const emitGen = join(TESTS_DIR, '.emit-gen');
-if (existsSync(emitGen)) rmSync(emitGen, { recursive: true });
-mkdirSync(emitGen, { recursive: true });
+run(`cd ${__dir} && node_modules/.bin/tsp compile ${CACHE}/alltypes.tsp --emit=@specodec/typespec-emitter-typescript \
+  --option @specodec/typespec-emitter-typescript.emitter-output-dir=${GENERATED}`);
 
-run(`cd ${LANG_ROOT} && npx tsp compile ${CACHE}/alltypes.tsp --emit=@specodec/typespec-emitter-ts \
-  --option @specodec/typespec-emitter-ts.emitter-output-dir=${emitGen}`);
-
-// Verify generated files exist
-const generatedFile = join(emitGen, 'test-service.types.ts');
-if (existsSync(generatedFile)) {
-  console.log('  ✓ Generated test-service.types.ts');
+const tsFiles = readdirSync(GENERATED).filter(f => f.endsWith(".ts"));
+if (tsFiles.length > 0) {
+  console.log("  ✓ Generated " + tsFiles.join(", "));
 } else {
-  console.error('  FAIL: No generated file');
+  console.error("  FAIL: No generated TS files");
   process.exit(1);
 }
 
-// Step 5: Emit roundtrip test
-console.log('\n=== Step 5: Emit roundtrip test ===');
-const outputEmitTs = join(TESTS_DIR, 'output_emit_ts');
-if (existsSync(outputEmitTs)) rmSync(outputEmitTs, { recursive: true });
-mkdirSync(outputEmitTs, { recursive: true });
+console.log("\n=== Step 4: Generate test runner ===");
+run(`cd ${__dir} && VEC_DIR=${VEC_DIR} node generate_emit_runner.mjs`);
 
-// Copy emit runner from tests repo
-const emitRunnerDir = join(TESTS_DIR, 'emit');
-if (!existsSync(emitRunnerDir)) {
-  mkdirSync(emitRunnerDir, { recursive: true });
-}
+console.log("\n=== Step 5: Run tests ===");
+if (existsSync(OUT_DIR)) rmSync(OUT_DIR, { recursive: true });
+ensure(OUT_DIR);
 
-// Run emit test directly (TS doesn't need podman)
-const testModels = JSON.parse(readFileSync(join(vectorsDir, 'manifest.json'))).testModels;
-for (const name of testModels) {
-  console.log(`  Testing ${name}...`);
-}
+// Build runtime first
+run(`cd ${join(__dir, "..", "..")} && pnpm install && pnpm run build`);
 
-console.log('\n=== ALL PASSED ===');
+// Run emit test
+run(`cd ${__dir} && VEC_DIR=${VEC_DIR} OUT_DIR=${OUT_DIR} pnpm exec tsx src/run_emit.ts`);
+
+console.log("\n=== ALL PASSED ===");

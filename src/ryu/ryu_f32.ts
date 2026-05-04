@@ -4,7 +4,7 @@ const FLOAT_BIAS = 127;
 const FLOAT_POW5_INV_BITCOUNT = 59;
 const FLOAT_POW5_BITCOUNT = 61;
 
-import { pow5bits, log10Pow2, log10Pow5, decimalLength17, mulShift32, multipleOfPowerOf5_64, multipleOfPowerOf2_64 } from './ryu_math.js';
+import { pow5bits, log10Pow2, log10Pow5, decimalLength9, mulShift32, multipleOfPowerOf5_32, multipleOfPowerOf2_32 } from './ryu_math.js';
 import { FLOAT_POW5_INV_SPLIT, FLOAT_POW5_SPLIT } from './tables_f32.js';
 
 export function float32ToString(f: number): string {
@@ -62,11 +62,11 @@ export function float32ToString(f: number): string {
     
     if (q <= 9) {
       if (mv % 5n === 0n) {
-        vrIsTrailingZeros = multipleOfPowerOf5_64(mv, q);
+        vrIsTrailingZeros = multipleOfPowerOf5_32(mv, q);
       } else if (acceptBounds) {
-        vmIsTrailingZeros = multipleOfPowerOf5_64(mm, q);
+        vmIsTrailingZeros = multipleOfPowerOf5_32(mm, q);
       } else {
-        if (multipleOfPowerOf5_64(mp, q)) vp = vp - 1n;
+        if (multipleOfPowerOf5_32(mp, q)) vp = vp - 1n;
       }
     }
   } else {
@@ -93,11 +93,11 @@ export function float32ToString(f: number): string {
         vp = vp - 1n;
       }
     } else if (q < 31) {
-      vrIsTrailingZeros = multipleOfPowerOf2_64(mv, q - 1);
+      vrIsTrailingZeros = multipleOfPowerOf2_32(mv, q - 1);
       if (acceptBounds) {
-        vmIsTrailingZeros = multipleOfPowerOf5_64(mm, q);
+        vmIsTrailingZeros = multipleOfPowerOf5_32(mm, q);
       } else {
-        if (multipleOfPowerOf5_64(mp, q)) vp = vp - 1n;
+        if (multipleOfPowerOf5_32(mp, q)) vp = vp - 1n;
       }
     }
   }
@@ -134,7 +134,7 @@ export function float32ToString(f: number): string {
     const roundUp = (vr2 === vm2 && (!acceptBounds || !vmIsTrailingZeros)) || lastDigit >= 5n;
     const output = roundUp ? vr2 + 1n : vr2;
     const exp = e10 + removed;
-    const olength = decimalLength17(output);
+    const olength = decimalLength9(output);
     
     let result = sign ? "-" : "";
     const digits = output.toString();
@@ -156,7 +156,7 @@ export function float32ToString(f: number): string {
     
     const output = (vr2 === vm2 || lastDigit >= 5n) ? vr2 + 1n : vr2;
     const exp = e10 + removed;
-    const olength = decimalLength17(output);
+    const olength = decimalLength9(output);
     
     let result = sign ? "-" : "";
     const digits = output.toString();

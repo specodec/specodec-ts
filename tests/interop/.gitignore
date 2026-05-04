@@ -1,6 +1,6 @@
 .tests-cache/
-.emit-gen/
-output/
-output_emit/
 node_modules/
-dist/
+output/
+src/generated/
+src/run_emit.ts
+pnpm-lock.yaml
