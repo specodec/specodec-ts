@@ -54,7 +54,7 @@ ensure(OUT_DIR);
 run(`cd ${join(__dir, "..", "..")} && npm install && npm run build`);
 
 // Run emit test
-try { run(`cd ${__dir} && VEC_DIR=${VEC_DIR} OUT_DIR=${OUT_DIR} npx tsx src/run_emit.ts`); } catch (e) { console.log("TypeScript tests completed (some failures expected)"); }
+try { run(`cd ${__dir} && VEC_DIR=${VEC_DIR} OUT_DIR=${OUT_DIR} npx tsx emit/main.ts`); } catch (e) { console.log("TypeScript tests completed (some failures expected)"); }
 
 console.log('\n=== Step 6: Compare output ===');
 const manifest = JSON.parse(readFileSync(join(VEC_DIR, 'manifest.json'), 'utf-8'));
