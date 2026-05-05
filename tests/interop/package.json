@@ -4,8 +4,8 @@
   "type": "module",
   "dependencies": {
     "@specodec/specodec-runtime-typescript": "file:../../",
-    "@specodec/typespec-emitter-core": "0.1.0",
-    "@specodec/typespec-emitter-typescript": "0.1.1",
+    "@specodec/typespec-emitter-core": "^0.1.1",
+    "@specodec/typespec-emitter-typescript": "^0.1.3",
     "@typespec/compiler": "1.11.0"
   },
   "devDependencies": {
