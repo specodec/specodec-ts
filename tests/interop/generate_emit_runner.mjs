@@ -8,9 +8,12 @@ const VEC_DIR = process.env.VEC_DIR || path.join(__dir, ".tests-cache", "vectors
 const manifestPath = path.join(VEC_DIR, "manifest.json");
 const manifest = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
 
-const models = manifest.testModels;
+const models = [...(manifest.testModels || []), ...(manifest.testUnions || [])];
 const scalars = manifest.scalars;
 const modelNamespaces = manifest.modelNamespaces || {};
+const testUnions = new Set(manifest.testUnions || []);
+function isUnionTest(name) { return testUnions.has(name); }
+function unionNameOf(testName) { return testName.replace(/_[^_]+$/, ''); }
 
 function readMethod(type) {
   const map = {
@@ -60,10 +63,11 @@ function scalarCall(name) {
 
 function modelFunc(model) {
   const snake = toSnakeCase(model);
+  const codecName = isUnionTest(model) ? unionNameOf(model) : model;
   return `
 function testModel_${snake}(vec: string, out: string): [number, number] {
   let passed = 0, failed = 0;
-  const codec = gen.${model}Codec;
+  const codec = gen.${codecName}Codec;
   try {
     const mp = readFile(join(vec, "${model}.msgpack"));
     const obj = codec.decode(new MsgPackReader(mp));
@@ -108,7 +112,7 @@ function modelCall(model) {
 // Group models by namespace
 const groups = {};
 for (const model of models) {
-  const ns = modelNamespaces[model] || [];
+  const nsStr = modelNamespaces[model] || ""; const ns = nsStr ? nsStr.split(".") : [];
   const key = ns.length > 0 ? ns.join("_") : "_root";
   if (!groups[key]) groups[key] = [];
   groups[key].push(model);
@@ -144,34 +148,41 @@ function writeFile(outDir: string, file: string, data: Buffer) {
 const groupKeys = Object.keys(groups);
 const groupInfo = []; // { key, funcName, fileName }
 
+// Scalar-only file
+if (Object.keys(scalars).length > 0) {
+  let scalarBody = preamble + "\n";
+  for (const [name, info] of Object.entries(scalars)) {
+    scalarBody += scalarFunc(name, info) + "\n";
+  }
+  scalarBody += `export function runScalars(vec: string, out: string): [number, number] {\n`;
+  scalarBody += `  let passed = 0, failed = 0;\n`;
+  scalarBody += "\n  // Scalar tests\n";
+  for (const [name] of Object.entries(scalars)) {
+    scalarBody += "  " + scalarCall(name);
+  }
+  scalarBody += `  return [passed, failed];\n`;
+  scalarBody += `}\n`;
+  const scalarFile = "test_scalars.ts";
+  fs.writeFileSync(path.join(outDir, scalarFile), scalarBody);
+  groupInfo.push({ key: "_scalars", funcName: "runScalars", fileName: scalarFile });
+  console.log(`Generated emit/${scalarFile} with ${Object.keys(scalars).length} scalars`);
+}
+
 for (const key of groupKeys) {
   const funcName = nsFuncName(key);
   const fileName = nsFileName(key);
   groupInfo.push({ key, funcName, fileName });
   const groupModels = groups[key];
-  const isRoot = key === "_root";
 
   let body = preamble + "\n";
 
   // Function definitions
-  if (isRoot) {
-    for (const [name, info] of Object.entries(scalars)) {
-      body += scalarFunc(name, info) + "\n";
-    }
-  }
   for (const model of groupModels) {
     body += modelFunc(model) + "\n";
   }
 
   body += `export function ${funcName}(vec: string, out: string): [number, number] {\n`;
   body += `  let passed = 0, failed = 0;\n`;
-
-  if (isRoot && Object.keys(scalars).length > 0) {
-    body += `\n  // Scalar tests\n`;
-    for (const [name] of Object.entries(scalars)) {
-      body += "  " + scalarCall(name);
-    }
-  }
 
   if (groupModels.length > 0) {
     body += `\n  // Object tests\n`;
@@ -185,7 +196,7 @@ for (const key of groupKeys) {
 
   const filePath = path.join(outDir, fileName);
   fs.writeFileSync(filePath, body);
-  console.log(`Generated emit/${fileName} with ${isRoot ? Object.keys(scalars).length + " scalars + " : ""}${groupModels.length} models`);
+  console.log(`Generated emit/${fileName} with ${groupModels.length} models`);
 }
 
 // Write main.ts

@@ -85,18 +85,6 @@ export function respond<T>(
   obj: T,
   format: string,
   registry: FormatRegistry = defaultRegistry,
-): Uint8Array {
-  const fmt = registry.match(format);
-  const w = fmt.newWriter();
-  codec.encode(w, obj);
-  return w.toBytes();
-}
-
-export function respondFull<T>(
-  codec: SpecCodec<T>,
-  obj: T,
-  format: string,
-  registry: FormatRegistry = defaultRegistry,
 ): RespondResult {
   const fmt = registry.match(format);
   const w = fmt.newWriter();
