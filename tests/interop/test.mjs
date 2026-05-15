@@ -51,7 +51,7 @@ if (existsSync(OUT_DIR)) rmSync(OUT_DIR, { recursive: true });
 ensure(OUT_DIR);
 
 // Build runtime first
-run(`cd ${join(__dir, "..", "..")} && npm install && npm run build`);
+run(`npm install @specodec/specodec-runtime-typescript@1.0.0 --ignore-scripts --registry http://10.199.64.20:3000/api/packages/specodec/npm/`);
 
 // Run emit test
 try { run(`cd ${__dir} && VEC_DIR=${VEC_DIR} OUT_DIR=${OUT_DIR} npx tsx emit/main.ts`); } catch (e) { console.log("TypeScript tests completed (some failures expected)"); }
