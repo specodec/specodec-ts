@@ -1,11 +1,11 @@
-import type { SpecReader } from "./spec_reader.js";
-import type { SpecWriter } from "./spec_writer.js";
-import { JsonWriter } from "./json_writer.js";
-import { JsonReader } from "./json_reader.js";
-import { MsgPackWriter } from "./msgpack_writer.js";
-import { MsgPackReader } from "./msgpack_reader.js";
-import { GronWriter } from "./gron_writer.js";
-import { GronReader } from "./gron_reader.js";
+import type { SpecReader } from "./spec-reader.js";
+import type { SpecWriter } from "./spec-writer.js";
+import { JsonWriter } from "./json-writer.js";
+import { JsonReader } from "./json-reader.js";
+import { MsgPackWriter } from "./msgpack-writer.js";
+import { MsgPackReader } from "./msgpack-reader.js";
+import { GronWriter } from "./gron-writer.js";
+import { GronReader } from "./gron-reader.js";
 
 export interface SpecCodec<T> {
   encode(w: SpecWriter, obj: T): void;

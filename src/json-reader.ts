@@ -1,4 +1,4 @@
-import type { SpecReader } from "./spec_reader.js";
+import type { SpecReader } from "./spec-reader.js";
 
 export class JsonReader implements SpecReader {
   private readonly src: string;

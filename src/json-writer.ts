@@ -1,4 +1,4 @@
-import { formatFloat32, formatFloat64 } from "./float_fmt.js";
+import { formatFloat32, formatFloat64 } from "./float-fmt.js";
 
 export class JsonWriter {
   private parts: string[] = [];

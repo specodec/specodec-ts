@@ -1,4 +1,4 @@
-import type { SpecReader } from "./spec_reader.js";
+import type { SpecReader } from "./spec-reader.js";
 
 export class MsgPackReader implements SpecReader {
   private readonly buf: Uint8Array;
