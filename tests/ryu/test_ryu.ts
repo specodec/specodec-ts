@@ -1,5 +1,5 @@
-import { float32ToString } from '../../src/ryu/ryu_f32.js';
-import { float64ToString } from '../../src/ryu/ryu_f64.js';
+import { float32ToString } from '../../src/ryu/ryu-f32.js';
+import { float64ToString } from '../../src/ryu/ryu-f64.js';
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';

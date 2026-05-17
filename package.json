@@ -12,10 +12,12 @@
   },
   "scripts": {
     "build": "tsc",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "test": "npx tsx tests/ryu/test_ryu.ts"
   },
   "devDependencies": {
-    "typescript": "^5.8.0"
+    "typescript": "^5.8.0",
+    "tsx": "^4.0.0"
   },
   "publishConfig": {
     "registry": "http://10.199.64.20:3000/api/packages/specodec/npm/"
