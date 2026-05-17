@@ -4,8 +4,8 @@ const FLOAT_BIAS = 127;
 const FLOAT_POW5_INV_BITCOUNT = 59;
 const FLOAT_POW5_BITCOUNT = 61;
 
-import { pow5bits, log10Pow2, log10Pow5, decimalLength9, mulShift32, multipleOfPowerOf5_32, multipleOfPowerOf2_32 } from './ryu_math.js';
-import { FLOAT_POW5_INV_SPLIT, FLOAT_POW5_SPLIT } from './tables_f32.js';
+import { pow5bits, log10Pow2, log10Pow5, decimalLength9, mulShift32, multipleOfPowerOf5_32, multipleOfPowerOf2_32 } from './ryu-math.js';
+import { FLOAT_POW5_INV_SPLIT, FLOAT_POW5_SPLIT } from './tables-f32.js';
 
 export function float32ToString(f: number): string {
   const buf = new ArrayBuffer(4);

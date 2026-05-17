@@ -4,8 +4,8 @@ const DOUBLE_BIAS = 1023;
 const DOUBLE_POW5_INV_BITCOUNT = 125;
 const DOUBLE_POW5_BITCOUNT = 125;
 
-import { pow5bits, log10Pow2, log10Pow5, decimalLength17, mulShift64, multipleOfPowerOf5_64, multipleOfPowerOf2_64 } from './ryu_math.js';
-import { DOUBLE_POW5_INV_SPLIT, DOUBLE_POW5_SPLIT } from './tables_f64.js';
+import { pow5bits, log10Pow2, log10Pow5, decimalLength17, mulShift64, multipleOfPowerOf5_64, multipleOfPowerOf2_64 } from './ryu-math.js';
+import { DOUBLE_POW5_INV_SPLIT, DOUBLE_POW5_SPLIT } from './tables-f64.js';
 
 export function float64ToString(d: number): string {
   const buf = new ArrayBuffer(8);

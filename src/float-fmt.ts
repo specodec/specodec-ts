@@ -1,5 +1,5 @@
-import { float32ToString } from './ryu/ryu_f32.js';
-import { float64ToString } from './ryu/ryu_f64.js';
+import { float32ToString } from './ryu/ryu-f32.js';
+import { float64ToString } from './ryu/ryu-f64.js';
 
 export function formatFloat32(v: number): string {
     return float32ToString(v);
