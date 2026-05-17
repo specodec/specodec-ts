@@ -1,4 +1,4 @@
-export function pow5bits(e: number): number {
+export function pow5Bits(e: number): number {
   return Math.floor((e * 1217359) / 524288) + 1;
 }
 

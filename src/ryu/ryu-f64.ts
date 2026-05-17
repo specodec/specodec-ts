@@ -4,7 +4,7 @@ const DOUBLE_BIAS = 1023;
 const DOUBLE_POW5_INV_BITCOUNT = 125;
 const DOUBLE_POW5_BITCOUNT = 125;
 
-import { pow5bits, log10Pow2, log10Pow5, decimalLength17, mulShift64, multipleOfPowerOf5_64, multipleOfPowerOf2_64 } from './ryu-math.js';
+import { pow5Bits, log10Pow2, log10Pow5, decimalLength17, mulShift64, multipleOfPowerOf5_64, multipleOfPowerOf2_64 } from './ryu-math.js';
 import { DOUBLE_POW5_INV_SPLIT, DOUBLE_POW5_SPLIT } from './tables-f64.js';
 
 export function float64ToString(d: number): string {
@@ -48,7 +48,7 @@ export function float64ToString(d: number): string {
   if (e2 >= 0) {
     const q = log10Pow2(e2);
     e10 = q;
-    const k = DOUBLE_POW5_INV_BITCOUNT + pow5bits(q) - 1;
+    const k = DOUBLE_POW5_INV_BITCOUNT + pow5Bits(q) - 1;
     const i = -e2 + q + k;
     
     vr = mulShift64(mv, DOUBLE_POW5_INV_SPLIT[q], i);
@@ -56,7 +56,7 @@ export function float64ToString(d: number): string {
     vm_ = mulShift64(mm, DOUBLE_POW5_INV_SPLIT[q], i);
     
     if (q !== 0 && (vp - 1n) / 10n <= vm_ / 10n) {
-      const l = DOUBLE_POW5_INV_BITCOUNT + pow5bits(q - 1) - 1;
+      const l = DOUBLE_POW5_INV_BITCOUNT + pow5Bits(q - 1) - 1;
       lastDigit = mulShift64(mv, DOUBLE_POW5_INV_SPLIT[q - 1], -e2 + q - 1 + l) % 10n;
     }
     
@@ -73,7 +73,7 @@ export function float64ToString(d: number): string {
     const q = log10Pow5(-e2);
     e10 = q + e2;
     const i = -e2 - q;
-    const k = pow5bits(i) - DOUBLE_POW5_BITCOUNT;
+    const k = pow5Bits(i) - DOUBLE_POW5_BITCOUNT;
     const j = q - k;
     
     vr = mulShift64(mv, DOUBLE_POW5_SPLIT[i], j);
@@ -81,7 +81,7 @@ export function float64ToString(d: number): string {
     vm_ = mulShift64(mm, DOUBLE_POW5_SPLIT[i], j);
     
     if (q !== 0 && (vp - 1n) / 10n <= vm_ / 10n) {
-      const j2 = q - 1 - (pow5bits(i + 1) - DOUBLE_POW5_BITCOUNT);
+      const j2 = q - 1 - (pow5Bits(i + 1) - DOUBLE_POW5_BITCOUNT);
       lastDigit = mulShift64(mv, DOUBLE_POW5_SPLIT[i + 1], j2) % 10n;
     }
     
